@@ -1,23 +1,39 @@
-import { StyleSheet, ImageBackground } from "react-native";
-import StartGameScreen from "./screens/StartGameScreen";
-import { LinearGradient } from "expo-linear-gradient";
 import { useState } from "react";
-import GameOverScreen from "./screens/GameScreen";
-import GameScreen from "./screens/GameOverScreen";
-import { SafeAreaView } from "react-native";
-import Colors from "./constaints/colors";
+import { StyleSheet, ImageBackground, SafeAreaView } from "react-native";
+import { LinearGradient } from "expo-linear-gradient";
+import { useFonts } from "expo-font";
+import StartGameScreen from "./screens/StartGameScreen";
+import GameScreen from "./screens/GameScreen";
+import GameOverScreen from "./screens/GameOverScreen";
+import Colors from "./constants/colors";
+import AppLoading from "expo-app-loading";
 
 export default function App() {
   const [userNumber, setUserNumber] = useState();
-  const [gameIsOver, setGameOver] = useState(true);
+  const [gameIsOver, setGameIsOver] = useState(true);
+  const [guestRounds, setGuestRounds] = useState(0);
+
+  const [fontsLoaded] = useFonts({
+    "open-sans": require("./assets/fonts/OpenSans-Regular.ttf"),
+    "open-sans-bold": require("./assets/fonts/OpenSans-Bold.ttf"),
+  });
+
+  if (!fontsLoaded) {
+    return <AppLoading />;
+  }
 
   function pickedNumberHandler(pickedNumber) {
     setUserNumber(pickedNumber);
-    setGameOver(false);
+    setGameIsOver(false);
   }
 
   function gameOverHandler() {
-    setGameOver(true);
+    setGameIsOver(true);
+  }
+
+  function startNewGameHandler() {
+    setUserNumber(null);
+    setGuestRounds(0);
   }
 
   let screen = <StartGameScreen onPickNumber={pickedNumberHandler} />;
@@ -29,7 +45,13 @@ export default function App() {
   }
 
   if (gameIsOver && userNumber) {
-    screen = <GameOverScreen />;
+    screen = (
+      <GameOverScreen
+        userNumber={userNumber}
+        roundsNumber={guestRounds}
+        onStartNewGame={startNewGameHandler}
+      />
+    );
   }
 
   return (
@@ -53,8 +75,7 @@ const styles = StyleSheet.create({
   rootScreen: {
     flex: 1,
   },
-
   backgroundImage: {
-    opacity: 0.4,
+    opacity: 0.15,
   },
 });
