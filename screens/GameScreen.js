@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { StyleSheet } from "react-native";
+import { FlatList, StyleSheet } from "react-native";
 import { View } from "react-native";
 import { Text } from "react-native";
 import NumberContainer from "../components/game/NumberContainer";
@@ -9,6 +9,7 @@ import { Alert } from "react-native";
 import Card from "../components/ui/Card";
 import InstructionText from "../components/ui/InstructionText";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import GuessLogItem from "../components/game/GuessLogItem";
 
 function generateRandomNumber(min, max, exclude) {
   const rndNum = Math.floor(Math.random() * (max - min)) + min;
@@ -30,7 +31,7 @@ function GameScreem({ userNumber, onGameOver }) {
 
   useEffect(() => {
     if (currentGuess === userNumber) {
-      onGameOver();
+      onGameOver(guessRounds.length);
     }
   }, [currentGuess, userNumber, onGameOver]);
 
@@ -64,8 +65,10 @@ function GameScreem({ userNumber, onGameOver }) {
       currentGuess
     );
     setCurrentGuess(newRndNum);
-    setGuessRounds((prevGuessRounds) => [newRndNum, ,,,prevGuessRounds]);
+    setGuessRounds((prevGuessRounds) => [newRndNum, ...prevGuessRounds]);
   }
+
+  const guessRoundsListLength = guessRounds.length;
 
   return (
     <View style={styles.rootScreen}>
@@ -92,8 +95,21 @@ function GameScreem({ userNumber, onGameOver }) {
           </View>
         </View>
       </Card>
-      <View>
-        {guessRounds.map((guessRounds) => <Text key={guessRounds}>{guessRounds}</Text>)}
+      <View style={styles.listContainer}>
+        {/* {guessRounds.map((guessRounds) => (
+          <Text key={guessRounds}>{guessRounds}</Text>
+        ))} */}
+
+        <FlatList
+          data={guessRounds}
+          renderItem={(itemData) => (
+            <GuessLogItem
+              roundNumber={guessRoundsListLength - itemData.index}
+              guess={itemData.item}
+            />
+          )}
+          keyExtractor={(item) => item.toString()}
+        />
       </View>
     </View>
   );
@@ -116,5 +132,10 @@ const styles = StyleSheet.create({
   },
   buttonContainer: {
     flex: 1,
+  },
+
+  listContainer: {
+    flex: 1,
+    padding: 20,
   },
 });
